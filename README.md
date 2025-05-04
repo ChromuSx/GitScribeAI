@@ -1,5 +1,3 @@
----
-
 # 🤖 GitScribeAI
 
 **GitScribeAI** is a command-line tool that automatically generates Git commit messages using **OpenAI's artificial intelligence**.
