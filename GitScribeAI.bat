@@ -84,51 +84,15 @@ if "%LANGUAGE%"=="english" (
    set "prompt=Analyze the following Git diff and generate a concise and descriptive commit message in English, following conventional commit conventions (type: description). Reply ONLY with the commit message, without further explanations:"
 )
 
-REM Create a complete PowerShell script that handles everything
-echo $ErrorActionPreference = 'Stop' > "%TEMP_DIR%\full_api_call.ps1"
-echo # Read the Git diff >> "%TEMP_DIR%\full_api_call.ps1"
-echo $diff = Get-Content -Raw '%TEMP_DIR%\git_diff_temp.txt' >> "%TEMP_DIR%\full_api_call.ps1"
-echo $prompt = '%prompt%' >> "%TEMP_DIR%\full_api_call.ps1"
-echo $fullContent = $prompt + "`n`n" + $diff >> "%TEMP_DIR%\full_api_call.ps1"
-echo # Prepare API request body >> "%TEMP_DIR%\full_api_call.ps1"
-echo $requestBody = @{ >> "%TEMP_DIR%\full_api_call.ps1"
-echo   model = '%MODEL%' >> "%TEMP_DIR%\full_api_call.ps1"
-echo   messages = @( >> "%TEMP_DIR%\full_api_call.ps1"
-echo     @{ >> "%TEMP_DIR%\full_api_call.ps1"
-echo       role = 'user' >> "%TEMP_DIR%\full_api_call.ps1"
-echo       content = $fullContent >> "%TEMP_DIR%\full_api_call.ps1"
-echo     } >> "%TEMP_DIR%\full_api_call.ps1"
-echo   ) >> "%TEMP_DIR%\full_api_call.ps1"
-echo } >> "%TEMP_DIR%\full_api_call.ps1"
-echo # Convert to JSON >> "%TEMP_DIR%\full_api_call.ps1"
-echo $jsonBody = ConvertTo-Json -Depth 10 $requestBody >> "%TEMP_DIR%\full_api_call.ps1"
-echo # Save JSON for debugging >> "%TEMP_DIR%\full_api_call.ps1"
-echo Set-Content -Path '%TEMP_DIR%\request.json' -Value $jsonBody -Encoding UTF8 >> "%TEMP_DIR%\full_api_call.ps1"
-echo # Setup API headers >> "%TEMP_DIR%\full_api_call.ps1"
-echo $headers = @{ >> "%TEMP_DIR%\full_api_call.ps1"
-echo   'Content-Type' = 'application/json' >> "%TEMP_DIR%\full_api_call.ps1"
-echo   'Authorization' = 'Bearer %OPENAI_API_KEY%' >> "%TEMP_DIR%\full_api_call.ps1"
-echo } >> "%TEMP_DIR%\full_api_call.ps1"
-echo # Make API call >> "%TEMP_DIR%\full_api_call.ps1"
-echo try { >> "%TEMP_DIR%\full_api_call.ps1"
-echo   $response = Invoke-RestMethod -Uri 'https://api.openai.com/v1/chat/completions' -Method Post -Headers $headers -Body $jsonBody >> "%TEMP_DIR%\full_api_call.ps1"
-echo   # Extract and output the message >> "%TEMP_DIR%\full_api_call.ps1"
-echo   $message = $response.choices[0].message.content.Trim() >> "%TEMP_DIR%\full_api_call.ps1"
-echo   Write-Output $message >> "%TEMP_DIR%\full_api_call.ps1"
-echo } catch { >> "%TEMP_DIR%\full_api_call.ps1"
-echo   Write-Output "ERROR: $_" >> "%TEMP_DIR%\full_api_call.ps1"
-echo   exit 1 >> "%TEMP_DIR%\full_api_call.ps1"
-echo } >> "%TEMP_DIR%\full_api_call.ps1"
-
 echo.
 echo Calling OpenAI API...
-REM Execute the PowerShell script for the complete API flow
-powershell -ExecutionPolicy Bypass -File "%TEMP_DIR%\full_api_call.ps1" > "%TEMP_DIR%\clean_message.txt"
+
+REM Create a single-line PowerShell command with correct escaping
+powershell -ExecutionPolicy Bypass -Command "$ErrorActionPreference = 'Stop'; try { $diff = Get-Content -Raw '%TEMP_DIR%\git_diff_temp.txt' -Encoding UTF8; $prompt = '%prompt%'; $fullContent = $prompt + [Environment]::NewLine + [Environment]::NewLine + $diff; $requestBody = @{ model = '%MODEL%'; messages = @( @{ role = 'user'; content = $fullContent } ) }; $client = New-Object System.Net.WebClient; $client.Headers.Add('Content-Type', 'application/json'); $client.Headers.Add('Authorization', 'Bearer %OPENAI_API_KEY%'); $jsonBody = ConvertTo-Json -InputObject $requestBody -Depth 10 -Compress; $responseBytes = $client.UploadData('https://api.openai.com/v1/chat/completions', 'POST', [System.Text.Encoding]::UTF8.GetBytes($jsonBody)); $responseBody = [System.Text.Encoding]::UTF8.GetString($responseBytes); $response = $responseBody | ConvertFrom-Json; if ($response.choices -and $response.choices.Count -gt 0) { $message = $response.choices[0].message.content.Trim(); Write-Output $message; } else { throw 'Invalid response format'; } } catch { Write-Error \"ERROR: $_\"; exit 1; }" > "%TEMP_DIR%\clean_message.txt" 2> "%TEMP_DIR%\error.txt"
 
 if %ERRORLEVEL% NEQ 0 (
-   type "%TEMP_DIR%\clean_message.txt"
-   echo.
-   echo Error during API call.
+   echo Errore durante la chiamata API:
+   type "%TEMP_DIR%\error.txt"
    goto cleanup
 )
 
