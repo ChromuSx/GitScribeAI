@@ -1,7 +1,23 @@
 # 🤖 GitScribeAI
 
-**GitScribeAI** is a command-line tool that automatically generates Git commit messages using **OpenAI's artificial intelligence**.
-By analyzing staged changes, it produces commit messages that are **concise**, **descriptive**, and follow **standard conventions**.
+<div align="center">
+  <img src="logo.png" alt="GitScribeAI" width="200">
+</div>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Windows-Batch-0078D6?logo=windows&logoColor=white" alt="Windows Batch">
+  <img src="https://img.shields.io/badge/PowerShell-5.0+-5391FE?logo=powershell&logoColor=white" alt="PowerShell">
+  <img src="https://img.shields.io/badge/OpenAI-API-412991?logo=openai&logoColor=white" alt="OpenAI API">
+  <img src="https://img.shields.io/badge/Git-Required-F05032?logo=git&logoColor=white" alt="Git Required">
+  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License">
+  <img src="https://img.shields.io/badge/languages-EN%20%7C%20IT-brightgreen" alt="Languages">
+</p>
+
+<p align="center">
+  <strong>GitScribeAI is a command-line tool that automatically generates Git commit messages using OpenAI's artificial intelligence.
+  By analyzing staged changes, it produces commit messages that are concise, descriptive, and follow standard conventions.
+  </strong>
+</p>
 
 ---
 
